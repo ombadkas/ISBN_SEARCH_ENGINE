@@ -1,5 +1,4 @@
 from urllib.request import urlopen
-import requests
 from PyQt5.QtWidgets import QDialog, QMainWindow
 import cv2
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -267,9 +266,14 @@ class Ui_main(QMainWindow):
         images = bs.findAll('img', {'id': 'coverImage'})
         for image in images:
             self.path = image['src']
-            image = QImage()
-            image.loadFromData(requests.get(self.path).content)
-            self.jug.label_14.setPixmap(QPixmap(image))
+            try:
+                with urlopen(self.path) as response:
+                    image_data = response.read()
+                    image = QImage()
+                    image.loadFromData(image_data)
+                    self.jug.label_14.setPixmap(QPixmap(image))
+            except Exception as e:
+                print(f"Error loading image from {self.path}: {e}")
 
 class MyForm(QDialog):
     def __init__(self):
